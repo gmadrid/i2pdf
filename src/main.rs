@@ -111,10 +111,10 @@ fn process_image(args: &Args, img: image::DynamicImage) -> image::DynamicImage {
     output
 }
 
-fn create_pdf(img_view: &image::DynamicImage) -> PdfDocumentReference {
+fn create_pdf(doc_name: &str, img_view: &image::DynamicImage) -> PdfDocumentReference {
     let pdf_image = Image::from_dynamic_image(img_view);
     let (doc, page, layer) = PdfDocument::new(
-        "TODO:",
+        doc_name,
         pdf_image.image.width.into_pt(DPI).into(),
         pdf_image.image.height.into_pt(DPI).into(),
         "Layer 1",
@@ -132,7 +132,7 @@ fn main() -> std::result::Result<(), ()> {
     for file in &args.files {
         let image = open_image(&file).map_err(|_| ())?;
         let processed = process_image(&args, image);
-        let pdf = create_pdf(&processed);
+        let pdf = create_pdf(&file.to_string_lossy(), &processed);
 
         let outfile = file.with_extension("pdf");
         pdf.save(&mut BufWriter::new(File::create(outfile).unwrap()))
